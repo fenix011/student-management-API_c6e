@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Management System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>Student Management System</h1>
+        <p>Demonstrating Client-Server Architecture</p>
+    </header>
+
+    <main>
+        <!-- Statistics Section -->
+        <section id="statistics">
+            <h2>Grade Statistics</h2>
+            <div id="stats-container"></div>
+        </section>
+
+        <!-- Student List -->
+        <section id="students">
+            <h2>Students</h2>
+            <div class="controls">
+                <button onclick="StudentApp.loadStudents()">Refresh</button>
+                <button onclick="StudentApp.showAddForm()">Add Student</button>
+                <label>
+                    Min Grade:
+                    <input type="number" id="minGrade" min="0" max="100"
+                           onchange="StudentApp.filterByGrade(this.value)">
+                </label>
+            </div>
+            <div id="student-list"></div>
+        </section>
+
+        <!-- Add/Edit Form (hidden by default) -->
+        <section id="student-form" class="hidden">
+            <h2 id="form-title">Add Student</h2>
+            <form onsubmit="StudentApp.saveStudent(event)">
+                <input type="hidden" id="studentId">
+                <label>
+                    Name:
+                    <input type="text" id="studentName" required>
+                </label>
+                <label>
+                    Email:
+                    <input type="email" id="studentEmail" required>
+                </label>
+                <label>
+                    Grade:
+                    <input type="number" id="studentGrade" min="0" max="100" required>
+                </label>
+                <div class="form-buttons">
+                    <button type="submit">Save</button>
+                    <button type="button" onclick="StudentApp.hideForm()">Cancel</button>
+                </div>
+            </form>
+        </section>
+    </main>
+
+    <footer>
+        <p>Teaching Example - KISS Principle Applied</p>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
