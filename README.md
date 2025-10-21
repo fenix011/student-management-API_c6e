@@ -86,9 +86,11 @@ You should see:
 
 ### 4. Open the Frontend
 
+**IMPORTANT:** You need to run a separate HTTP server for the frontend!
+
 **Option A: Serve with Python HTTP server (recommended)**
 ```bash
-# In a new terminal window
+# In a NEW terminal window (keep backend running in the first)
 python3 -m http.server 8000
 ```
 Then open your browser to: `http://localhost:8000`
@@ -97,6 +99,46 @@ Then open your browser to: `http://localhost:8000`
 ```bash
 xdg-open index.html
 # or simply open index.html in your browser
+```
+Note: This may cause CORS issues with some browsers.
+
+## ⚠️ Common Error: 404 When Accessing Backend Directly
+
+**WRONG:** Opening `http://127.0.0.1:5000` in your browser
+- **Result:** 404 Error - "The requested URL was not found on the server"
+- **Why:** The Flask backend is an API-only server with no HTML routes
+
+**CORRECT:** This is a TWO-SERVER architecture:
+
+1. **Backend API Server (Port 5000)** - Serves JSON data only
+   ```
+   Terminal 1: python3 backend.py
+   Routes: /api/students, /api/statistics, etc.
+   DO NOT access http://localhost:5000 in browser!
+   ```
+
+2. **Frontend HTTP Server (Port 8000)** - Serves HTML/CSS/JS files
+   ```
+   Terminal 2: python3 -m http.server 8000
+   Access: http://localhost:8000 ← Use this URL!
+   ```
+
+**How it works:**
+```
+Browser → localhost:8000 → index.html loads
+                             ↓
+                        app.js makes fetch() calls
+                             ↓
+                        localhost:5000/api/*
+                             ↓
+                        Flask returns JSON
+```
+
+**Testing the API directly (for development):**
+```bash
+# Use curl, not your browser
+curl http://localhost:5000/api/students
+curl http://localhost:5000/api/statistics
 ```
 
 ## Usage
@@ -212,6 +254,18 @@ CREATE TABLE students (
 3. **MVC-like Separation:** Routes, data layer, presentation separate
 
 ## Troubleshooting
+
+### 404 Error - "URL not found on the server"
+**Symptom:** Opening http://127.0.0.1:5000 shows 404 error
+
+**Cause:** You're accessing the API backend directly. It only serves JSON at /api/* routes.
+
+**Solution:**
+1. Keep backend running (Terminal 1: `python3 backend.py`)
+2. Start frontend server (Terminal 2: `python3 -m http.server 8000`)
+3. Open browser to `http://localhost:8000` (NOT port 5000!)
+
+See the "⚠️ Common Error" section above for full details.
 
 ### Port 5000 Already in Use
 ```bash

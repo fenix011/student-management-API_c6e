@@ -1,0 +1,141 @@
+#+TITLE: Student Management API - Bug Tracker
+#+AUTHOR: Fenix
+#+DATE: 2025-10-21
+#+STARTUP: overview
+
+* DONE 404 Error - URL Not Found (Accessing Backend Directly)
+:PROPERTIES:
+:CREATED: [2025-10-21]
+:RESOLVED: [2025-10-21]
+:SEVERITY: High
+:STATUS: Closed
+:END:
+
+** Description
+Getting a 404 error when accessing http://127.0.0.1:5000 directly in the browser.
+
+** Error Details
+- *Error Message:* "The requested URL was not found on the server. If you entered the URL manually please check your spelling and try again."
+- *HTTP Status:* 404
+- *Component:* User error / Misunderstanding of architecture
+- *Accessed URL:* http://127.0.0.1:5000/ (root path)
+
+** Environment
+- Backend: Flask on http://127.0.0.1:5000
+- Frontend: HTML/JavaScript
+
+** Steps to Reproduce
+1. Start Flask backend: python3 backend.py
+2. Open browser
+3. Navigate to http://127.0.0.1:5000/
+4. Receive 404 error
+
+** Expected Behavior
+User expects to see the web application interface.
+
+** Actual Behavior
+Receiving 404 Not Found error with message about URL not found on server.
+
+** Root Cause Analysis
+- [X] Frontend not properly served
+- The Flask backend (port 5000) is an *API-only server*
+- It only responds to /api/* routes, not root (/)
+- The HTML frontend must be served separately
+
+** Investigation Notes
+Backend logs show:
+#+BEGIN_SRC
+127.0.0.1 - - [21/Oct/2025 14:17:52] "GET / HTTP/1.1" 404 -
+127.0.0.1 - - [21/Oct/2025 14:17:52] "GET /favicon.ico HTTP/1.1" 404 -
+#+END_SRC
+
+The Flask app has NO route for "/" or "/favicon.ico" - only /api/* endpoints exist.
+
+** Solution
+This is a *TWO-SERVER ARCHITECTURE*:
+
+1. *Backend API Server (Port 5000):* Serves JSON data only
+   - Routes: /api/students, /api/statistics, etc.
+   - DO NOT access http://localhost:5000 directly in browser
+
+2. *Frontend HTTP Server (Port 8000):* Serves HTML/CSS/JS files
+   - Open new terminal
+   - Run: =python3 -m http.server 8000=
+   - Access: http://localhost:8000
+   - This serves index.html, which makes fetch() calls to port 5000
+
+** How It Works
+#+BEGIN_SRC
+Browser → http://localhost:8000 → index.html + app.js + style.css
+                                         ↓
+                                    JavaScript fetch()
+                                         ↓
+                              http://localhost:5000/api/students
+                                         ↓
+                                    Flask Backend
+                                         ↓
+                                   SQLite Database
+#+END_SRC
+
+** Testing API Directly (CLI)
+If you want to test the backend API directly, use curl:
+#+BEGIN_SRC bash
+curl http://localhost:5000/api/students
+curl http://localhost:5000/api/statistics
+#+END_SRC
+
+** Related Files
+- backend.py (API routes start at line 26)
+- app.js (API_BASE constant)
+- index.html (must be served via HTTP server)
+
+** Prevention
+Updated README.md with clearer instructions and warning section.
+
+---
+
+* Bug Tracking Legend
+
+** Priority Levels
+- *Critical:* System down, data loss
+- *High:* Major functionality broken
+- *Medium:* Feature partially working
+- *Low:* Minor issue, cosmetic
+
+** Status Types
+- *Open:* Bug identified, not started
+- *In Progress:* Currently being investigated/fixed
+- *Testing:* Fix implemented, needs verification
+- *Closed:* Bug resolved and verified
+- *Wontfix:* Decided not to fix
+- *Duplicate:* Same as another bug
+
+** Common Issues & Solutions
+
+*** 404 Error - Accessing Backend Directly
+*Most Common Issue!*
+
+- *Symptom:* "The requested URL was not found on the server"
+- *Cause:* Trying to access http://localhost:5000 in browser
+- *Solution:* Use TWO terminals:
+  1. Terminal 1: =python3 backend.py= (port 5000)
+  2. Terminal 2: =python3 -m http.server 8000= (port 8000)
+  3. Browser: http://localhost:8000 ← CORRECT URL
+- Flask backend is API-only, no HTML routes at root (/)
+- See full bug report above for architecture diagram
+
+*** CORS Errors
+- Check Flask-CORS is installed
+- Verify CORS(app) in backend.py
+- Check browser console for specific CORS message
+- Make sure you're serving frontend via HTTP server, not file://
+
+*** Database Issues
+- Reset: rm database.db && python3 init_db.py
+- Check permissions on database.db file
+- Database locked: Close all connections and restart backend
+
+*** Port Conflicts
+- Backend port 5000: Check with lsof -i :5000
+- Frontend port 8000: Change in python3 -m http.server command
+- Kill process: kill -9 <PID>
