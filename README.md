@@ -340,6 +340,32 @@ Educational project - Free to use and modify for teaching purposes.
 Teaching example following KISS principle and Unix philosophy.
 Created for Computer Science education.
 
+## 🌿 Available Branches
+
+This repository has multiple versions for different learning levels:
+
+### `main` - Full Stack Version
+- **Description**: Complete web application with Flask REST API + Vanilla JavaScript frontend
+- **Technologies**: Flask, SQLite, HTML/CSS/JS
+- **Architecture**: Client-Server (2 servers: backend API + frontend)
+- **Best for**: Learning full-stack development, RESTful APIs, client-server architecture
+
+### `python+sqlite` - Basic MVP
+- **Description**: Command-line only version using native Python + SQLite
+- **Technologies**: Python 3 standard library, SQLite
+- **Architecture**: Simple CLI application
+- **Best for**: Learning database basics, CRUD operations, Python programming
+- **See**: [README_MVP.md](README_MVP.md) for details
+
+**Switch branches:**
+```bash
+# View full-stack version
+git checkout main
+
+# View basic MVP version
+git checkout python+sqlite
+```
+
 ---
 
 **Current Status:**
